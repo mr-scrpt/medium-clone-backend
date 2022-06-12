@@ -8,9 +8,10 @@ import { UserModule } from '@app/user/user.module';
 import { AppService } from '@app/app.service';
 import ormconfig from '@app/configorm';
 import { AuthMiddleware } from '@app/user/middleware/auth.middleware';
+import { ArticleModule } from './article/article.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(ormconfig), TagModule, UserModule],
+  imports: [TypeOrmModule.forRoot(ormconfig), TagModule, UserModule, ArticleModule],
   controllers: [AppController],
   providers: [AppService],
 })
