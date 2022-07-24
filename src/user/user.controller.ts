@@ -42,9 +42,9 @@ export class UserController {
   @Get('user')
   @UseGuards(AuthGuard)
   async getCurretnUser(
-    @User() user: UserEntity,
+    @User() currentUser: UserEntity,
   ): Promise<UserResponseInterface> {
-    return await this.userService.buildUserResponse(user);
+    return await this.userService.buildUserResponse(currentUser);
   }
 
   @Put('user')
