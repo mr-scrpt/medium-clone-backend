@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -18,6 +19,8 @@ import { CreateArticleDto } from '@app/article/dto/createArticle.dto';
 import { ArticleResponseInterface } from '@app/article/types/articleResponse.interface';
 import { DeleteResult } from 'typeorm';
 import { UpdateArticleDto } from '@app/article/dto/updateArticle.dto';
+import { ArticlesResponseInterface } from '@app/article/types/ArticlesResponse.interface';
+import { QueryStringInterface } from '@app/article/types/queryString.interface';
 
 @Controller('articles')
 export class ArticleController {
@@ -36,6 +39,14 @@ export class ArticleController {
     );
 
     return this.articleService.buildArcticleResponse(article);
+  }
+
+  @Get()
+  async getArticleAll(
+    @User('id') userId: string,
+    @Query() query: QueryStringInterface,
+  ): Promise<ArticlesResponseInterface> {
+    return await this.articleService.getArticleAll(userId, query);
   }
 
   @Get(':slug')
