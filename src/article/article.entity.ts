@@ -37,7 +37,7 @@ export class ArticleEntity {
   favoritesCount: number;
 
   @BeforeUpdate()
-  updateTime() {
+  async updateTime() {
     this.updateAt = new Date();
   }
 

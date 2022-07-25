@@ -1,5 +1,6 @@
 import { ArticleEntity } from '@app/article/article.entity';
 import { CreateArticleDto } from '@app/article/dto/createArticle.dto';
+import { UpdateArticleDto } from '@app/article/dto/updateArticle.dto';
 import { ArticleResponseInterface } from '@app/article/types/articleResponse.interface';
 import { UserEntity } from '@app/user/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
@@ -19,6 +20,8 @@ export class ArticleService {
     createArcticleDto: CreateArticleDto,
   ): Promise<ArticleEntity> {
     const article = new ArticleEntity();
+    console.log('article dto here', createArcticleDto);
+
     Object.assign(article, createArcticleDto);
 
     if (!article.tagList) {
@@ -47,6 +50,27 @@ export class ArticleService {
     }
 
     return await this.articleRepository.delete({ slug });
+  }
+
+  async updateArticleBySlug(
+    slug: string,
+    userId: string,
+    updateArcticleDto: UpdateArticleDto,
+  ): Promise<ArticleEntity> {
+    console.log('article dto here', updateArcticleDto);
+
+    const article = await this.getArticleBySlug(slug);
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+    if (article.author.id !== userId) {
+      throw new HttpException('You are not an author ', HttpStatus.FORBIDDEN);
+    }
+
+    Object.assign(article, updateArcticleDto);
+
+    return await this.articleRepository.save(article);
   }
 
   buildArcticleResponse(article: ArticleEntity): ArticleResponseInterface {
