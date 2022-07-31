@@ -3,4 +3,5 @@ export interface QueryStringInterface {
   limit?: number;
   offset?: number;
   tag?: string;
+  favorited: string;
 }
