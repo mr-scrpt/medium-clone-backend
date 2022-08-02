@@ -1,6 +1,7 @@
+import { ProfileType } from '@app/profile/types/profile.type';
 import { ProfileResponseInterface } from '@app/profile/types/profileResponse.interface';
 import { UserEntity } from '@app/user/user.entity';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,18 +11,26 @@ export class ProfileService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
-  async getProfileByUserName(username: string): Promise<UserEntity> {
-    return await this.userRepository.findOneBy({
-      username,
+  async getProfileByUserName(
+    profileUsername: string,
+    userId,
+  ): Promise<ProfileType> {
+    const user = await this.userRepository.findOneBy({
+      username: profileUsername,
     });
+    if (!user) {
+      throw new HttpException(
+        'User profile dose not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return { ...user, following: false };
   }
 
-  buildProfileResponse(profile: UserEntity): ProfileResponseInterface {
+  buildProfileResponse(profile: ProfileType): ProfileResponseInterface {
+    delete profile.email;
     return {
-      profile: {
-        ...profile,
-        following: true,
-      },
+      profile,
     };
   }
 }
