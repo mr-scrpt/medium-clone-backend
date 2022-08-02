@@ -1,6 +1,6 @@
-import ormconfig from '@app/configorm';
+import configdorm from '@app/configorm';
 import { DataSource } from 'typeorm';
 
-const ormDataSorce = new DataSource(ormconfig);
+const ormDataSorceSeeds = new DataSource(configdorm);
 
-export default ormDataSorce;
+export default ormDataSorceSeeds;

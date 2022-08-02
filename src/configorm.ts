@@ -1,6 +1,6 @@
 import { DataSourceOptions } from 'typeorm';
 
-const ormconfig: DataSourceOptions = {
+const configorm: DataSourceOptions = {
   type: 'postgres',
   host: 'localhost',
   port: 5432,
@@ -13,4 +13,4 @@ const ormconfig: DataSourceOptions = {
   logging: false,
 };
 
-export default ormconfig;
+export default configorm;

@@ -20,7 +20,8 @@
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/cofigormdatasource.ts",
     "db:drop": "yarn typeorm schema:drop",
     "db:create": "yarn typeorm migration:generate ./src/migrations/migrations",
-    "db:migrate": "yarn typeorm migration:run"
+    "db:migrate": "yarn typeorm migration:run",
+    "db:seeds": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/cofigormdatasourceseeds.ts migration:run"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
