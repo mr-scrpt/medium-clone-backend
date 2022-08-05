@@ -10,6 +10,8 @@ import configorm from '@app/configorm';
 import { AuthMiddleware } from '@app/user/middleware/auth.middleware';
 import { ArticleModule } from './article/article.module';
 import { ProfileModule } from './profile/profile.module';
+import { ErrorHandlerService } from './error-handler/error-handler.service';
+import { ErrorHandlerModule } from './error-handler/error-handler.module';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { ProfileModule } from './profile/profile.module';
     UserModule,
     ArticleModule,
     ProfileModule,
+    ErrorHandlerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ErrorHandlerService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

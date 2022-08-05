@@ -2,7 +2,7 @@ import { ProfileService } from '@app/profile/profile.service';
 import { ProfileResponseInterface } from '@app/profile/types/profileResponse.interface';
 import { User } from '@app/user/decorators/user.decorator';
 import { AuthGuard } from '@app/user/guards/auth.guard';
-import { UserService } from '@app/user/user.service';
+
 import {
   Controller,
   Delete,

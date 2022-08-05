@@ -4,6 +4,7 @@ import { UpdateArticleDto } from '@app/article/dto/updateArticle.dto';
 import { ArticleResponseInterface } from '@app/article/types/articleResponse.interface';
 import { ArticlesResponseInterface } from '@app/article/types/ArticlesResponse.interface';
 import { QueryStringInterface } from '@app/article/types/queryString.interface';
+import { FollowEntity } from '@app/profile/follow.entity';
 import { UserEntity } from '@app/user/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +19,9 @@ export class ArticleService {
 
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+
+    @InjectRepository(FollowEntity)
+    private readonly followRepository: Repository<FollowEntity>,
   ) {}
 
   async createArticle(
@@ -25,7 +29,6 @@ export class ArticleService {
     createArcticleDto: CreateArticleDto,
   ): Promise<ArticleEntity> {
     const article = new ArticleEntity();
-    console.log('article dto here', createArcticleDto);
 
     Object.assign(article, createArcticleDto);
 
@@ -46,7 +49,6 @@ export class ArticleService {
       .leftJoinAndSelect('articles.author', 'author');
 
     queryBuilder.orderBy('articles.createAt', 'DESC');
-    const articlesCount = await queryBuilder.getCount();
     const { author, tag, limit, offset, favorited } = query;
 
     if (tag) {
@@ -101,6 +103,7 @@ export class ArticleService {
       });
       favoriteIds = user.favorites.map((fav) => fav.id);
     }
+    const articlesCount = await queryBuilder.getCount();
     const articles = await queryBuilder.getMany();
     const articlesWithFavorites = articles.map((article) => {
       const favorited = favoriteIds.includes(article.id);
@@ -111,6 +114,54 @@ export class ArticleService {
       articles: articlesWithFavorites,
       articlesCount,
     };
+  }
+
+  async getUserFeed(
+    userId: string,
+    query: any,
+  ): Promise<ArticlesResponseInterface> {
+    console.log('is in');
+    console.log('userId', userId);
+
+    const follows = await this.followRepository.find({
+      where: {
+        followerId: userId,
+      },
+    });
+
+    console.log('follows', follows);
+
+    if (follows.length === 0) {
+      console.log('here');
+
+      return { articles: [], articlesCount: 0 };
+    }
+
+    const followingUserIds = follows.map((follow) => follow.followingId);
+
+    console.log('followUserIds', followingUserIds);
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('articles')
+      .leftJoinAndSelect('articles.author', 'author')
+      .where('articles.authorId IN (:...ids)', {
+        ids: followingUserIds,
+      });
+
+    queryBuilder.orderBy('articles.createAt', 'DESC');
+
+    const { limit, offset } = query;
+
+    if (limit) {
+      queryBuilder.limit(limit);
+    }
+    if (offset) {
+      queryBuilder.offset(offset);
+    }
+    const articlesCount = await queryBuilder.getCount();
+    const articles = await queryBuilder.getMany();
+
+    return { articles, articlesCount };
   }
 
   async getArticleBySlug(slug: string): Promise<ArticleEntity> {
@@ -138,8 +189,6 @@ export class ArticleService {
     userId: string,
     updateArcticleDto: UpdateArticleDto,
   ): Promise<ArticleEntity> {
-    console.log('article dto here', updateArcticleDto);
-
     const article = await this.getArticleBySlug(slug);
 
     if (!article) {

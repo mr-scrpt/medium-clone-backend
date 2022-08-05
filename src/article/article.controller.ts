@@ -12,7 +12,6 @@ import {
   Query,
   UseGuards,
   UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { User } from '@app/user/decorators/user.decorator';
 import { CreateArticleDto } from '@app/article/dto/createArticle.dto';
@@ -21,6 +20,7 @@ import { DeleteResult } from 'typeorm';
 import { UpdateArticleDto } from '@app/article/dto/updateArticle.dto';
 import { ArticlesResponseInterface } from '@app/article/types/ArticlesResponse.interface';
 import { QueryStringInterface } from '@app/article/types/queryString.interface';
+import { BackendValidationPipe } from '@app/shared/pipes/backendValidation.pipe';
 
 @Controller('articles')
 export class ArticleController {
@@ -28,7 +28,7 @@ export class ArticleController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async createArcticle(
     @User() currentUser: UserEntity,
     @Body('article') createArcticleDto: CreateArticleDto,
@@ -46,7 +46,19 @@ export class ArticleController {
     @User('id') userId: string,
     @Query() query: QueryStringInterface,
   ): Promise<ArticlesResponseInterface> {
+    console.log('all');
+
     return await this.articleService.getArticleAll(userId, query);
+  }
+  @Get('feed')
+  @UseGuards(AuthGuard)
+  async getUserFeed(
+    @User('id') userId: string,
+    @Param() query: any,
+  ): Promise<ArticlesResponseInterface> {
+    console.log('in ctrl');
+
+    return await this.articleService.getUserFeed(userId, query);
   }
 
   @Get(':slug')
@@ -63,12 +75,14 @@ export class ArticleController {
     @Param('slug') slug: string,
     @User('id') userId: string,
   ): Promise<DeleteResult> {
+    console.log('in contrl');
+
     return await this.articleService.deleteArticleBySlug(slug, userId);
   }
 
   @Put(':slug')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async updateArticleBySlag(
     @Param('slug') slug: string,
     @User('id') userId: string,

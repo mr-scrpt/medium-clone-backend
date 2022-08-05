@@ -9,12 +9,14 @@ import { UserResponseInterface } from '@app/user/types/userResponse.interface';
 import { LoginUserDto } from '@app/user/dto/loginUser.dto';
 import { compare } from 'bcrypt';
 import { UpdateUserDto } from '@app/user/dto/updateUser.dto';
+import { ErrorHandlerService } from '@app/error-handler/error-handler.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private errorsHandlerService: ErrorHandlerService,
   ) {}
 
   async getUserByEmail(email: string): Promise<UserEntity> {
@@ -40,16 +42,31 @@ export class UserService {
       username,
     });
   }
+
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    console.log('in create');
+
     const userByEmail = await this.getUserByEmail(createUserDto.email);
     const userByUserName = await this.getUserByUserName(createUserDto.username);
 
-    if (userByEmail || userByUserName) {
-      throw new HttpException(
-        'Email or username are taken',
-        HttpStatus.UNPROCESSABLE_ENTITY,
+    /* const errorResponse = {
+      errors: {},
+    }; */
+
+    if (userByEmail) {
+      this.errorsHandlerService.errorHandler(
+        'email',
+        'Email has already been taken',
       );
     }
+    if (userByUserName) {
+      this.errorsHandlerService.errorHandler(
+        'username',
+        'Username has already been taken',
+      );
+    }
+    this.errorsHandlerService.checkError(HttpStatus.UNPROCESSABLE_ENTITY);
+
     const newUser = new UserEntity();
     Object.assign(newUser, createUserDto);
     return await this.userRepository.save(newUser);
